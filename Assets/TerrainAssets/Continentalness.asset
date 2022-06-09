@@ -15,20 +15,20 @@ MonoBehaviour:
   autoUpdate: 1
   noiseSettings:
     normaliseMode: 1
-    scale: 1200
-    octaves: 3
-    persistence: 0.25
-    lacunarity: 3
+    scale: 1500
+    octaves: 2
+    persistence: 0.327
+    lacunarity: 3.72
     seed: 39
     offset: {x: 155.61, y: 200}
-  useFalloff: 0
+  useForTerrain: 1
   heightMultiplier: 400
   heightCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.24168968
+      value: 0.122580655
       inSlope: -0.7238938
       outSlope: -0.7238938
       tangentMode: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
       outWeight: 0.43197095
     - serializedVersion: 3
       time: 0.1354407
-      value: -0.8363813
+      value: -0.71989644
       inSlope: -0.37353227
       outSlope: -0.37353227
       tangentMode: 0
@@ -45,8 +45,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.41873363
     - serializedVersion: 3
-      time: 0.23217565
-      value: -0.8587824
+      time: 0.23011379
+      value: -0.2679283
       inSlope: 0.0082755
       outSlope: 0.0082755
       tangentMode: 0
@@ -54,26 +54,17 @@ MonoBehaviour:
       inWeight: 0.41984412
       outWeight: 0.6769653
     - serializedVersion: 3
-      time: 0.33966914
-      value: -0.29646474
-      inSlope: 1.7256088
-      outSlope: 1.7256088
+      time: 0.3691713
+      value: 0.005104039
+      inSlope: -1.6002992
+      outSlope: -1.6002992
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
+      inWeight: 0.48883772
+      outWeight: 0.5084933
     - serializedVersion: 3
-      time: 0.4260438
-      value: -0.24118687
-      inSlope: 0.8390241
-      outSlope: 0.8390241
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.7069265
-    - serializedVersion: 3
-      time: 0.4739379
-      value: 0.039164927
+      time: 0.5000609
+      value: 0.18076469
       inSlope: 0.21321276
       outSlope: 0.21321276
       tangentMode: 0
@@ -81,8 +72,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.56914043
     - serializedVersion: 3
-      time: 0.55269504
-      value: 0.4217653
+      time: 0.571738
+      value: 0.5487398
       inSlope: -4.8212266
       outSlope: -4.8212266
       tangentMode: 0
@@ -90,8 +81,8 @@ MonoBehaviour:
       inWeight: 1
       outWeight: 0.4006484
     - serializedVersion: 3
-      time: 0.64652884
-      value: 0.7053439
+      time: 0.65293753
+      value: 0.8367591
       inSlope: 0.2622241
       outSlope: 0.2622241
       tangentMode: 0
@@ -99,8 +90,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.15193774
     - serializedVersion: 3
-      time: 0.675158
-      value: 0.95439947
+      time: 0.67643976
+      value: 1.0944283
       inSlope: 1.2345396
       outSlope: 1.2345396
       tangentMode: 0
@@ -108,8 +99,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.886041
-      value: 1.2293677
+      time: 0.8515561
+      value: 1.7301484
       inSlope: 0.03892427
       outSlope: 0.03892427
       tangentMode: 0
@@ -118,7 +109,7 @@ MonoBehaviour:
       outWeight: 0.59324497
     - serializedVersion: 3
       time: 1
-      value: 3.2
+      value: 2.6324415
       inSlope: 0.5215995
       outSlope: 0.5215995
       tangentMode: 0
@@ -128,3 +119,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  mapName: Continentalness

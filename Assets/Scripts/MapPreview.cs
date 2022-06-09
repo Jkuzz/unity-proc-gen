@@ -41,16 +41,26 @@ public class MapPreview : MonoBehaviour {
 
     public void DrawMapInEditor() {
         heightMapSettings = GetComponent<TerrainGenerator>().heightMapSettings;
+
         if(drawMode == DrawMode.NoiseMap) {
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine * 5, heightMapSettings, Vector2.zero);
-            DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
+            float[,] combinedTerrainHeightMap = GetCombinedHeightMaps(10);
+            DrawTexture(TextureGenerator.TextureFromHeightMap(combinedTerrainHeightMap));
         } else if (drawMode == DrawMode.Mesh) {
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, heightMapSettings, Vector2.zero);
-            DrawMesh(MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD));
-        } else if (drawMode == DrawMode.FalloffMap) {
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, heightMapSettings, Vector2.zero);
-            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.NumVerticesPerLine), 0, 1)));
+            float[,] combinedTerrainHeightMap = GetCombinedHeightMaps();
+            DrawMesh(MeshGenerator.GenerateTerrainMesh(combinedTerrainHeightMap, meshSettings, editorPreviewLOD));
         }
+    }
+
+
+    private float[,] GetCombinedHeightMaps(int sizeMultiplier = 1) {
+        List<HeightMap> heightMapsToCombine = new();
+        foreach(HeightMapSettingsSelect hmSettingsSelect in heightMapSettings) {
+            if(!hmSettingsSelect.enabled || !hmSettingsSelect.heightMapSettings.useForTerrain) {
+                continue;
+            }
+            heightMapsToCombine.Add(HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine * sizeMultiplier, hmSettingsSelect.heightMapSettings, Vector2.zero));
+        }
+        return HeightMapUtils.CombineHeightMaps(heightMapsToCombine);
     }
 
 

@@ -70,6 +70,7 @@
      <Compile Include="Assets\Scripts\Poisson\PoissonViewer.cs" />
      <Compile Include="Assets\Scripts\Poisson\ObjectSpawner.cs" />
      <Compile Include="Assets\Scripts\NoiseMap.cs" />
+     <Compile Include="Assets\Scripts\HeightMapUtils.cs" />
      <None Include="Assets\Import\Stylized Water For URP\Shaders\Libraries\WaterFoam.hlsl" />
      <None Include="Assets\Import\Stylized Water For URP\Scripts\UI\Acknowledgements.uxml" />
      <None Include="Assets\Import\Stylized Water For URP\Scripts\UI\Find Errors.uss" />

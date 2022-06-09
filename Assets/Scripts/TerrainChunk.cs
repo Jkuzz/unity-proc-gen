@@ -9,38 +9,43 @@ public class TerrainChunk {
     public event Action<TerrainChunk, bool> OnVisibilityChanged;
     public Vector2 coord;
 
-    GameObject meshObject;
+    readonly GameObject meshObject;
     Vector2 sampleCenter;
     Bounds bounds;
 
     GameObject waterChunk;
-    WaterChunkManager waterChunkManager;
 
-    MeshRenderer meshRenderer;
-    MeshFilter meshFilter;
-    MeshCollider meshCollider;
-
-    LODInfo[] detailLevels;
-    LODMesh[] lodMeshes;
-    int colliderLODIndex;
+    readonly WaterChunkManager waterChunkManager;
+    readonly MeshRenderer meshRenderer;
+    readonly MeshFilter meshFilter;
+    readonly MeshCollider meshCollider;
+    readonly LODInfo[] detailLevels;
+    readonly LODMesh[] lodMeshes;
+    readonly int colliderLODIndex;
 
     HeightMap heightMap;
-    bool heightMapReceived;
+    bool HeightMapsReceived => heightMapsReceived >= heightMapsRequested;
+
     bool hasSetCollider;
     int previousLODIndex = -1;
-    float maxViewDist;
+    readonly float maxViewDist;
 
-    List<HeightMapSettingsSelect> heightMapSettings;
-    Dictionary<string, NoiseMap> noiseMaps;
-    MeshSettings meshSettings;
-    Transform viewer;
+    readonly List<HeightMapSettingsSelect> heightMapSettingsList;
+    // height maps stored in dictionary to allow easily fetching specific map
+    readonly Dictionary<string, HeightMap> heightMaps = new();
+    float[,] combinedTerrainHeightMaps;
+    readonly MeshSettings meshSettings;
+    readonly Transform viewer;
+
+    int heightMapsRequested = 0;
+    int heightMapsReceived = 0;
 
 
-    public TerrainChunk(Vector2 coord, List<HeightMapSettingsSelect> heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material, Transform viewer, WaterChunkManager waterChunkManager) {
+    public TerrainChunk(Vector2 coord, List<HeightMapSettingsSelect> heightMapSettingsList, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material, Transform viewer, WaterChunkManager waterChunkManager) {
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
         this.coord = coord;
-        this.heightMapSettings = heightMapSettings;
+        this.heightMapSettingsList = heightMapSettingsList;
         this.meshSettings = meshSettings;
         this.viewer = viewer;
         this.waterChunkManager = waterChunkManager;
@@ -58,10 +63,10 @@ public class TerrainChunk {
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
 
         Transform chunkParent = parent.Find("Chunk Container");
-        if(chunkParent == null) {
+        if (chunkParent == null) {
             GameObject newContainer = new("Chunk Container");
             newContainer.transform.parent = parent;
-            chunkParent =  newContainer.transform;
+            chunkParent = newContainer.transform;
         }
         meshObject.transform.parent = chunkParent;
 
@@ -80,28 +85,39 @@ public class TerrainChunk {
 
 
     public void Load() {
-        ThreadedDataRequester.RequestData(
-            () => HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, heightMapSettings, sampleCenter),
-            OnHeightMapReceived
-        );
+        heightMapsRequested = heightMapSettingsList.Count; // to avoid potential race condition
+        foreach (HeightMapSettingsSelect settings in heightMapSettingsList) {
+            if (!settings.enabled) {
+                heightMapsRequested -= 1;
+                continue;
+            }
+            ThreadedDataRequester.RequestData(
+                () => HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, settings.heightMapSettings, sampleCenter),
+                OnHeightMapReceived
+            );
+        }
     }
 
 
     void OnHeightMapReceived(object heightMapObject) {
+        heightMapsReceived += 1;
         heightMap = (HeightMap)heightMapObject;
-        heightMapReceived = true;
+        heightMaps.Add(heightMap.heightMapSettings.mapName, heightMap);
 
-        // meshRenderer.material.SetTexture();
-
-        UpdateTerrainChunk();
+        if (HeightMapsReceived) {
+            // meshRenderer.material.SetTexture();
+            UpdateTerrainChunk();
+        }
     }
 
 
     Vector2 ViewerPosition => new(viewer.position.x / meshSettings.meshScale, viewer.position.z / meshSettings.meshScale);
 
 
+    // Update the chunk when entered/leaves render distance
+    // Called when height maps and meshes are received
     public void UpdateTerrainChunk() {
-        if (!heightMapReceived) {
+        if (!HeightMapsReceived) {
             return;
         }
         float viewerDistanceFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(ViewerPosition));
@@ -139,8 +155,14 @@ public class TerrainChunk {
                 if (lodMesh.hasMesh) {
                     previousLODIndex = lodIndex;
                     meshFilter.mesh = lodMesh.mesh;
+
+                    HeightMap textureHeightMap = heightMaps["Continentalness"];
+                    Texture2D chunkTexture = HeightMapUtils.TextureFromHeightMap(textureHeightMap, Color.white, Color.magenta);
+                    meshRenderer.material.mainTexture = chunkTexture;
+                    // TODO: colour heightmap here
                 } else if (!lodMesh.hasRequestedMesh) {
-                    lodMesh.RequestMesh(heightMap, meshSettings);
+                    CombineTerrainHeightMaps();
+                    lodMesh.RequestMesh(combinedTerrainHeightMaps, meshSettings);
                 }
                 #endregion
             }
@@ -152,6 +174,18 @@ public class TerrainChunk {
     }
 
 
+    private void CombineTerrainHeightMaps() {
+        List<HeightMap> heightMapsToCombine = new();
+        foreach (HeightMap heightMap in heightMaps.Values) {
+            if (heightMap.heightMapSettings.useForTerrain) {
+                heightMapsToCombine.Add(heightMap);
+            }
+        }
+        combinedTerrainHeightMaps = HeightMapUtils.CombineHeightMaps(heightMapsToCombine);
+    }
+
+
+
     public void UpdateCollisionMesh() {
         if (hasSetCollider) {
             return;
@@ -160,7 +194,8 @@ public class TerrainChunk {
 
         if (sqrDstFromViewerToEdge < detailLevels[colliderLODIndex].SqrVisibleDstThreshold) {
             if (!lodMeshes[colliderLODIndex].hasRequestedMesh) {
-                lodMeshes[colliderLODIndex].RequestMesh(heightMap, meshSettings);
+                CombineTerrainHeightMaps();
+                lodMeshes[colliderLODIndex].RequestMesh(combinedTerrainHeightMaps, meshSettings);
             }
         }
 
@@ -202,10 +237,10 @@ public class TerrainChunk {
         }
 
 
-        public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings) {
+        public void RequestMesh(float[,] heightMapValues, MeshSettings meshSettings) {
             hasRequestedMesh = true;
             ThreadedDataRequester.RequestData(
-                () => MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, LOD),
+                () => MeshGenerator.GenerateTerrainMesh(heightMapValues, meshSettings, LOD),
                 OnMeshDataReceived
             );
         }

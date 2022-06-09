@@ -16,19 +16,19 @@ MonoBehaviour:
   noiseSettings:
     normaliseMode: 1
     scale: 2000
-    octaves: 2
-    persistence: 0.422
-    lacunarity: 4
-    seed: 39
+    octaves: 3
+    persistence: 0.258
+    lacunarity: 1
+    seed: 38
     offset: {x: 0, y: 0}
-  useFalloff: 0
-  heightMultiplier: 400
+  useForTerrain: 1
+  heightMultiplier: 320
   heightCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.22137211
       inSlope: -0.65641445
       outSlope: -0.65641445
       tangentMode: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
       outWeight: 0.7227889
     - serializedVersion: 3
       time: 0.084236264
-      value: -0.16854234
+      value: 0.08840014
       inSlope: -0.19106092
       outSlope: -0.19106092
       tangentMode: 0
@@ -45,8 +45,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.35356346
     - serializedVersion: 3
-      time: 0.25748926
-      value: -0.86162436
+      time: 0.34164944
+      value: -0.4729282
       inSlope: 2.7943354
       outSlope: 2.7943354
       tangentMode: 0
@@ -55,7 +55,7 @@ MonoBehaviour:
       outWeight: 0.16595325
     - serializedVersion: 3
       time: 0.53207314
-      value: -1.3284191
+      value: -0.8266881
       inSlope: 4.5558577
       outSlope: 4.5558577
       tangentMode: 0
@@ -64,7 +64,7 @@ MonoBehaviour:
       outWeight: 0.8637713
     - serializedVersion: 3
       time: 0.6133214
-      value: -1.3327618
+      value: -0.8301142
       inSlope: 0.015581481
       outSlope: 0.015581481
       tangentMode: 0
@@ -73,7 +73,7 @@ MonoBehaviour:
       outWeight: 0.2428352
     - serializedVersion: 3
       time: 0.862905
-      value: -2.0289342
+      value: -1.3793616
       inSlope: 5.1526194
       outSlope: 5.1526194
       tangentMode: 0
@@ -82,7 +82,7 @@ MonoBehaviour:
       outWeight: 0.5032579
     - serializedVersion: 3
       time: 1
-      value: -2.1630015
+      value: -1.4851344
       inSlope: -0.1830521
       outSlope: -0.1830521
       tangentMode: 0
@@ -92,3 +92,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  mapName: Erosion

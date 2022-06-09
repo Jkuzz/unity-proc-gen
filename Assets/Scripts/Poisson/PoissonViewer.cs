@@ -125,27 +125,9 @@ public class PoissonViewer : MonoBehaviour {
     public void ShowNoisePreview(float[,] heightMap) {
         Renderer renderer = previewPlane.GetComponent<Renderer>();
 
-        Texture2D heightMapTexture = TextureFromColourMap(heightMap, noiseMapSize);
+        Texture2D heightMapTexture = HeightMapUtils.TextureFromHeightMap(heightMap, noiseMapSize, heightMapColourLow, heightMapColourHigh, 0, 1);
         renderer.sharedMaterial.mainTexture = heightMapTexture;
         previewPlane.localScale = new(regionSize.x / 10, 1, regionSize.y / 10);
-    }
-
-
-    public Texture2D TextureFromColourMap(float[,] heightMap, int size) {
-        Color[] colourMap = new Color[size * size];
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                colourMap[y * size + x] = Color.Lerp(heightMapColourLow, heightMapColourHigh, Mathf.InverseLerp(0, 1, heightMap[x, y]));
-            }
-        }
-
-        Texture2D texture = new(size, size) {
-            filterMode = FilterMode.Point,
-            wrapMode = TextureWrapMode.Clamp
-        };
-        texture.SetPixels(colourMap);
-        texture.Apply();
-        return texture;
     }
 }
 
