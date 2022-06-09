@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b4113c287d790d543a7ab9d7d6c5e658
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - meshSettings: {fileID: 11400000, guid: 70575bd1d7786c84099ffc4f82fccc6b, type: 2}
+  - heightMapSettings: {fileID: 11400000, guid: 4ddf231471539b64b882009fc32b7bc7, type: 2}
+  - textureSettings: {fileID: 11400000, guid: 1f7ecff648a3ad346bb172636a125dd7, type: 2}
+  - viewer: {instanceID: 0}
+  - mapMaterial: {fileID: 2100000, guid: f0b92fa5707d076468abda204684c6e7, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
