@@ -4,18 +4,24 @@ using UnityEngine;
 
 public class TerrainChunk {
 
-    const float colliderGenerationDistanceThreshold = 5;
+    const float colliderGenerationDistanceThreshold = 10;
 
     public event Action<TerrainChunk, bool> OnVisibilityChanged;
+    // Coordinate of chunk in chunk space - origin is (0, 0), around it (0, 1)...
     public Vector2 coord;
 
     readonly GameObject meshObject;
-    Vector2 sampleCenter;
+
+    // Centre of the noise sample
+    Vector2 noiseSampleCenter;
+    // Centre of the mesh in actual world coordinates
+    public readonly Vector2 meshWorldCentre;
     Bounds bounds;
 
     GameObject waterChunk;
 
     readonly WaterChunkManager waterChunkManager;
+    readonly PoissonManager poissonManager;
     readonly MeshRenderer meshRenderer;
     readonly MeshFilter meshFilter;
     readonly MeshCollider meshCollider;
@@ -30,18 +36,19 @@ public class TerrainChunk {
     int previousLODIndex = -1;
     readonly float maxViewDist;
 
-    readonly List<HeightMapSettingsSelect> heightMapSettingsList;
+    readonly List<HeightMapSettings> heightMapSettingsList;
     // height maps stored in dictionary to allow easily fetching specific map
     readonly Dictionary<string, HeightMap> heightMaps = new();
     float[,] combinedTerrainHeightMaps;
     readonly MeshSettings meshSettings;
     readonly Transform viewer;
 
-    int heightMapsRequested = 0;
-    int heightMapsReceived = 0;
+    volatile int heightMapsRequested = 0;
+    volatile int heightMapsReceived = 0;
+    bool hasSpawnedObjects = false;
 
 
-    public TerrainChunk(Vector2 coord, List<HeightMapSettingsSelect> heightMapSettingsList, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material, Transform viewer, WaterChunkManager waterChunkManager) {
+    public TerrainChunk(Vector2 coord, List<HeightMapSettings> heightMapSettingsList, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material, Transform viewer, WaterChunkManager waterChunkManager, PoissonManager poissonManager) {
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
         this.coord = coord;
@@ -49,10 +56,11 @@ public class TerrainChunk {
         this.meshSettings = meshSettings;
         this.viewer = viewer;
         this.waterChunkManager = waterChunkManager;
+        this.poissonManager = poissonManager;
 
-        sampleCenter = coord * meshSettings.MeshWorldSize / meshSettings.meshScale;
-        Vector2 position = coord * meshSettings.MeshWorldSize;
-        bounds = new(sampleCenter, Vector2.one * meshSettings.MeshWorldSize);
+        noiseSampleCenter = coord * meshSettings.MeshWorldSize / meshSettings.meshScale;
+        meshWorldCentre = coord * meshSettings.MeshWorldSize;
+        bounds = new(meshWorldCentre, Vector2.one * meshSettings.MeshWorldSize);
 
         meshObject = new GameObject("Terrain Chunk");
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
@@ -60,7 +68,7 @@ public class TerrainChunk {
         meshCollider = meshObject.AddComponent<MeshCollider>();
 
         meshRenderer.material = material;
-        meshObject.transform.position = new Vector3(position.x, 0, position.y);
+        meshObject.transform.position = new Vector3(meshWorldCentre.x, 0, meshWorldCentre.y);
 
         Transform chunkParent = parent.Find("Chunk Container");
         if (chunkParent == null) {
@@ -86,13 +94,9 @@ public class TerrainChunk {
 
     public void Load() {
         heightMapsRequested = heightMapSettingsList.Count; // to avoid potential race condition
-        foreach (HeightMapSettingsSelect settings in heightMapSettingsList) {
-            if (!settings.enabled) {
-                heightMapsRequested -= 1;
-                continue;
-            }
+        foreach (HeightMapSettings settings in heightMapSettingsList) {
             ThreadedDataRequester.RequestData(
-                () => HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, settings.heightMapSettings, sampleCenter),
+                () => HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine, settings, noiseSampleCenter),
                 OnHeightMapReceived
             );
         }
@@ -110,8 +114,7 @@ public class TerrainChunk {
         }
     }
 
-
-    Vector2 ViewerPosition => new(viewer.position.x / meshSettings.meshScale, viewer.position.z / meshSettings.meshScale);
+    Vector2 ViewerPosition => new(viewer.position.x, viewer.position.z);
 
 
     // Update the chunk when entered/leaves render distance
@@ -143,7 +146,7 @@ public class TerrainChunk {
                 #region Get Water
                 if (lodIndex == 0) {
                     if (waterChunk == null) {
-                        waterChunk = waterChunkManager.GetWaterChunk(sampleCenter * meshSettings.meshScale);
+                        waterChunk = waterChunkManager.GetWaterChunk(meshWorldCentre);
                     }
                 } else if (waterChunk != null) {
                     waterChunkManager.DisposeWaterChunk(waterChunk);
@@ -151,7 +154,7 @@ public class TerrainChunk {
                 }
                 #endregion
 
-                #region Request Mesh
+                #region Update/Request Mesh
                 if (lodMesh.hasMesh) {
                     previousLODIndex = lodIndex;
                     meshFilter.mesh = lodMesh.mesh;
@@ -159,7 +162,15 @@ public class TerrainChunk {
                     HeightMap textureHeightMap = heightMaps["Continentalness"];
                     Texture2D chunkTexture = HeightMapUtils.TextureFromHeightMap(textureHeightMap, Color.white, Color.magenta);
                     meshRenderer.material.mainTexture = chunkTexture;
-                    // TODO: colour heightmap here
+
+                    if (!hasSpawnedObjects && lodIndex == 0) {
+                        Debug.Log("Spawning objects for chunk " + meshWorldCentre);
+                        Dictionary<PoissonSampleType, List<Vector2>> generatedPoints = poissonManager.GeneratePoints(heightMaps["Forestyness"].values, Vector2.one * meshSettings.MeshWorldSize);
+
+                        // terrain heightmap should have been combined by now, see below
+                        poissonManager.SpawnObjects(generatedPoints, meshWorldCentre, combinedTerrainHeightMaps, meshSettings.MeshWorldSize);
+                        hasSpawnedObjects = true;
+                    }
                 } else if (!lodMesh.hasRequestedMesh) {
                     CombineTerrainHeightMaps();
                     lodMesh.RequestMesh(combinedTerrainHeightMaps, meshSettings);
@@ -185,12 +196,13 @@ public class TerrainChunk {
     }
 
 
-
     public void UpdateCollisionMesh() {
         if (hasSetCollider) {
             return;
         }
         float sqrDstFromViewerToEdge = bounds.SqrDistance(ViewerPosition);
+
+        // TODO: Fix issue when spawning in middle of chunk, collider is not set
 
         if (sqrDstFromViewerToEdge < detailLevels[colliderLODIndex].SqrVisibleDstThreshold) {
             if (!lodMeshes[colliderLODIndex].hasRequestedMesh) {

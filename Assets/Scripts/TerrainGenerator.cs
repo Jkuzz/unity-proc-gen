@@ -11,7 +11,7 @@ public class TerrainGenerator : MonoBehaviour {
     public LODInfo[] detailLevels;
 
     public MeshSettings meshSettings;
-    public List<HeightMapSettingsSelect> heightMapSettings;
+    public List<HeightMapSettings> heightMapSettings;
 
     public Transform viewer;
     public Material mapMaterial;
@@ -23,6 +23,7 @@ public class TerrainGenerator : MonoBehaviour {
     int chunksVisibleInViewdist;
 
     WaterChunkManager waterChunkManager;
+    PoissonManager poissonManager;
     readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new();
     readonly List<TerrainChunk> visibleTerrainChunks = new();
 
@@ -32,6 +33,7 @@ public class TerrainGenerator : MonoBehaviour {
         meshWorldSize = meshSettings.MeshWorldSize;
         chunksVisibleInViewdist = Mathf.RoundToInt(maxViewDist / meshWorldSize);
         waterChunkManager = GetComponentInChildren<WaterChunkManager>();
+        poissonManager = GetComponentInChildren<PoissonManager>();
 
         UpdateVisibleChunks();
     }
@@ -73,7 +75,7 @@ public class TerrainGenerator : MonoBehaviour {
                     if (terrainChunkDictionary.ContainsKey(viewedChunkCoord)) {
                         terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk();
                     } else {
-                        TerrainChunk newChunk = new(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, mapMaterial, viewer, waterChunkManager);
+                        TerrainChunk newChunk = new(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, mapMaterial, viewer, waterChunkManager, poissonManager);
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
                         newChunk.Load();
@@ -92,14 +94,6 @@ public class TerrainGenerator : MonoBehaviour {
         }
     }
 }
-
-
-[Serializable]
-public struct HeightMapSettingsSelect {
-    public bool enabled;
-    public HeightMapSettings heightMapSettings;
-}
-
 
 
 [Serializable]

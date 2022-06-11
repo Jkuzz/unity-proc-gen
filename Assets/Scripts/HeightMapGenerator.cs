@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,24 +6,19 @@ public static class HeightMapGenerator {
 
     public static HeightMap GenerateHeightMap(int size, HeightMapSettings heightMapSettings, Vector2 sampleCentre) {
 
-        // Total noise of all noiseMaps scaled by their height multiplier
+        // Total noise of noiseMap scaled by its height multiplier
         float[,] totalHeightMap = new float[size, size];
-
-        float[,] values = Noise.GenerateNoiseMap(size, heightMapSettings.noiseSettings, sampleCentre);
-        AnimationCurve heightCurve_threadsafe = new(heightMapSettings.heightCurve.keys);
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                totalHeightMap[i, j] += heightCurve_threadsafe.Evaluate(values[i, j]) * heightMapSettings.heightMultiplier;
-            }
-        }
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
+        float[,] values = Noise.GenerateNoiseMap(size, heightMapSettings.noiseSettings, sampleCentre);
+        AnimationCurve heightCurve_threadsafe = new(heightMapSettings.heightCurve.keys);
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                maxValue = Math.Max(maxValue, totalHeightMap[i, j]);
-                minValue = Math.Min(minValue, totalHeightMap[i, j]);
+                totalHeightMap[i, j] = heightCurve_threadsafe.Evaluate(values[i, j]) * heightMapSettings.heightMultiplier;
+                maxValue = Mathf.Max(maxValue, totalHeightMap[i, j]);
+                minValue = Mathf.Min(minValue, totalHeightMap[i, j]);
             }
         }
         return new HeightMap(totalHeightMap, minValue, maxValue, heightMapSettings);

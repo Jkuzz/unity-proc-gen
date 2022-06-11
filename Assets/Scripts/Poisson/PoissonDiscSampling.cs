@@ -4,7 +4,8 @@ using UnityEngine;
 public static class PoissonDiscSampling {
 
 
-    public static List<Vector2> GeneratePoints(SampleType sampleType, Vector2 sampleRegionSize, float[,] heightMap) {
+    // Points are centered! Need to be uncentered to use for world coordinates!
+    public static List<Vector2> GeneratePoints(PoissonSampleType sampleType, Vector2 sampleRegionSize, float[,] heightMap) {
 
         float cellSize = sampleType.radiusMin / Mathf.Sqrt(2);
         int cols = Mathf.CeilToInt(sampleRegionSize.x / cellSize);
@@ -75,6 +76,7 @@ public static class PoissonDiscSampling {
                 points.RemoveAt(i);
             }
         }
+        Debug.Log("Generated " + points.Count + " spawn points");
         return points;
     }
 

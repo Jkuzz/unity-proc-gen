@@ -36,14 +36,11 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="G:\UnityProjects\Terrain Extend\Assets\Import\StarterAssets\Editor\PackageChecker\StarterAssetsPackageChecker.dll" />
-  </ItemGroup>
-  <ItemGroup>
      <Compile Include="Assets\Import\StarterAssets\TutorialInfo\Scripts\Editor\ReadmeEditor.cs" />
      <Compile Include="Assets\Import\StarterAssets\Editor\FirstPersonStarterAssetsDeployMenu.cs" />
      <Compile Include="Assets\Editor\UpdatableDataEditor.cs" />
-     <Compile Include="Assets\Import\StarterAssets\Editor\StarterAssetsDeployMenu.cs" />
      <Compile Include="Assets\Editor\MapPreviewEditor.cs" />
+     <Compile Include="Assets\Import\StarterAssets\Editor\StarterAssetsDeployMenu.cs" />
     <Reference Include="UnityEngine">
         <HintPath>G:\Programs\Unity\2021.3.4f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -296,6 +293,9 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
         <HintPath>G:\Programs\Unity\2021.3.4f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="StarterAssetsPackageChecker">
+        <HintPath>G:\UnityProjects\Terrain Extend\Assets\Import\StarterAssets\Editor\PackageChecker\StarterAssetsPackageChecker.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
         <HintPath>G:\UnityProjects\Terrain Extend\Library\PackageCache\com.unity.collab-proxy@1.15.18\Lib\Editor\PlasticSCM\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -343,9 +343,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
         <HintPath>G:\UnityProjects\Terrain Extend\Library\PackageCache\com.unity.nuget.newtonsoft-json@3.0.2\Runtime\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="StarterAssetsPackageChecker">
-        <HintPath>G:\UnityProjects\Terrain Extend\Assets\Import\StarterAssets\Editor\PackageChecker\StarterAssetsPackageChecker.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
         <HintPath>G:\UnityProjects\Terrain Extend\Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>
@@ -857,6 +854,14 @@
       <Project>{f2919e80-6fc3-6d85-d5d4-1660a9e388f4}</Project>
       <Name>Unity.RenderPipeline.Universal.ShaderLibrary</Name>
     </ProjectReference>
+    <ProjectReference Include="StylizedWaterForURP.csproj">
+      <Project>{34bc3811-a429-aaab-9fc3-fd2677925ebb}</Project>
+      <Name>StylizedWaterForURP</Name>
+    </ProjectReference>
+    <ProjectReference Include="StylizedWaterForURPEditor.csproj">
+      <Project>{9452e614-7127-99f6-758f-6031b450d3d6}</Project>
+      <Name>StylizedWaterForURPEditor</Name>
+    </ProjectReference>
     <ProjectReference Include="Unity.RenderPipelines.Universal.Runtime.csproj">
       <Project>{b92b56d9-575d-2a86-ab98-b75ff62a7a04}</Project>
       <Name>Unity.RenderPipelines.Universal.Runtime</Name>
@@ -880,14 +885,6 @@
     <ProjectReference Include="Unity.RenderPipelines.Core.Editor.csproj">
       <Project>{16d0f7fc-cf50-a82c-00ab-dd8e4f2c7449}</Project>
       <Name>Unity.RenderPipelines.Core.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="StylizedWaterForURPEditor.csproj">
-      <Project>{9452e614-7127-99f6-758f-6031b450d3d6}</Project>
-      <Name>StylizedWaterForURPEditor</Name>
-    </ProjectReference>
-    <ProjectReference Include="StylizedWaterForURP.csproj">
-      <Project>{34bc3811-a429-aaab-9fc3-fd2677925ebb}</Project>
-      <Name>StylizedWaterForURP</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

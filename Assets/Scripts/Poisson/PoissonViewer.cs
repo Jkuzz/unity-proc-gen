@@ -13,10 +13,10 @@ public class PoissonViewer : MonoBehaviour {
     public Color heightMapColourHigh = Color.white;
 
     // Types of objects to spawn
-    public List<SampleType> sampleTypes;
+    public List<PoissonSampleType> sampleTypes;
 
     // Spawned object 2D positions
-    readonly Dictionary<SampleType, List<Vector2>> points = new();
+    readonly Dictionary<PoissonSampleType, List<Vector2>> points = new();
     // To not generate new points when old ones still valid
     bool gizmosValid = false;
 
@@ -28,7 +28,7 @@ public class PoissonViewer : MonoBehaviour {
         ShowNoisePreview(heightMap);
 
         points.Clear();
-        foreach (SampleType sampleType in sampleTypes) {
+        foreach (PoissonSampleType sampleType in sampleTypes) {
             sampleType.Validate();
             points.Add(sampleType, PoissonDiscSampling.GeneratePoints(sampleType, regionSize, heightMap));
         }
@@ -47,7 +47,7 @@ public class PoissonViewer : MonoBehaviour {
             return;
         }
 
-        foreach (KeyValuePair<SampleType, List<Vector2>> entry in points) {
+        foreach (KeyValuePair<PoissonSampleType, List<Vector2>> entry in points) {
             Gizmos.color = entry.Key.gizmoColour;
             foreach (Vector2 point in entry.Value) {
                 Gizmos.DrawSphere(new Vector3(point.x - regionSize.x / 2, 200, point.y - regionSize.y / 2), entry.Key.gizmoRadius);
@@ -61,14 +61,14 @@ public class PoissonViewer : MonoBehaviour {
     }
 
 
-    public void SpawnObjects(Dictionary<SampleType, List<Vector2>> objectSpawnPoints) {
+    public void SpawnObjects(Dictionary<PoissonSampleType, List<Vector2>> objectSpawnPoints) {
         GameObject containerParent = GameObject.Find("SpawnedObjectsContainer");
         if (containerParent == null) {
             containerParent = new("SpawnedObjectsContainer");
             containerParent.transform.parent = transform;
         }
 
-        foreach (KeyValuePair<SampleType, List<Vector2>> entry in objectSpawnPoints) {
+        foreach (KeyValuePair<PoissonSampleType, List<Vector2>> entry in objectSpawnPoints) {
             if (entry.Key.variants == null) {
                 Debug.LogWarning("SampleType " + entry.Key.typeName + " has no registered variant, skipping!");
                 continue;
@@ -128,30 +128,5 @@ public class PoissonViewer : MonoBehaviour {
         Texture2D heightMapTexture = HeightMapUtils.TextureFromHeightMap(heightMap, noiseMapSize, heightMapColourLow, heightMapColourHigh, 0, 1);
         renderer.sharedMaterial.mainTexture = heightMapTexture;
         previewPlane.localScale = new(regionSize.x / 10, 1, regionSize.y / 10);
-    }
-}
-
-
-[System.Serializable]
-public struct SampleType {
-    [Range(0, 1)]
-    public float sampleFullness;
-
-    public AnimationCurve radiusCurve;
-    [Range(1, 10)]
-    public float radiusMin;
-    [Range(1, 10)]
-    public float radiusMax;
-
-    public string typeName;
-
-    public int rejectionSamples;
-    public float gizmoRadius;
-    public Color gizmoColour;
-
-    public List<GameObject> variants;
-
-    public void Validate() {
-        radiusMax = Mathf.Max(radiusMin, radiusMax);
     }
 }

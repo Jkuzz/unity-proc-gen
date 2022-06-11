@@ -432,7 +432,7 @@
         <HintPath>G:\Programs\Unity\2021.3.4f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="StarterAssetsPackageChecker">
-        <HintPath>G:\UnityProjects\Terrain Extend\Assets\StarterAssets\Editor\PackageChecker\StarterAssetsPackageChecker.dll</HintPath>
+        <HintPath>G:\UnityProjects\Terrain Extend\Assets\Import\StarterAssets\Editor\PackageChecker\StarterAssetsPackageChecker.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
         <HintPath>G:\UnityProjects\Terrain Extend\Library\PackageCache\com.unity.collab-proxy@1.15.18\Lib\Editor\PlasticSCM\Unity.Plastic.Newtonsoft.Json.dll</HintPath>

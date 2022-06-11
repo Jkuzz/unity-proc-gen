@@ -11,7 +11,7 @@ public class MapPreview : MonoBehaviour {
     public DrawMode drawMode;
 
     public MeshSettings meshSettings;
-    List<HeightMapSettingsSelect> heightMapSettings;
+    List<HeightMapSettings> heightMapSettings;
     // public TextureData textureData;
 
     public Material terrainMaterial;
@@ -54,11 +54,11 @@ public class MapPreview : MonoBehaviour {
 
     private float[,] GetCombinedHeightMaps(int sizeMultiplier = 1) {
         List<HeightMap> heightMapsToCombine = new();
-        foreach(HeightMapSettingsSelect hmSettingsSelect in heightMapSettings) {
-            if(!hmSettingsSelect.enabled || !hmSettingsSelect.heightMapSettings.useForTerrain) {
+        foreach(HeightMapSettings hmSettings in heightMapSettings) {
+            if(!hmSettings.useForTerrain) {
                 continue;
             }
-            heightMapsToCombine.Add(HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine * sizeMultiplier, hmSettingsSelect.heightMapSettings, Vector2.zero));
+            heightMapsToCombine.Add(HeightMapGenerator.GenerateHeightMap(meshSettings.NumVerticesPerLine * sizeMultiplier, hmSettings, Vector2.zero));
         }
         return HeightMapUtils.CombineHeightMaps(heightMapsToCombine);
     }
@@ -71,12 +71,12 @@ public class MapPreview : MonoBehaviour {
             meshSettings.OnValuesUpdated += OnValuesUpdated;  // Subscribed max once
         }
         if(heightMapSettings != null) {
-            foreach(HeightMapSettingsSelect heightMapSettingsSelect in heightMapSettings) {
-                if(!heightMapSettingsSelect.enabled) {
+            foreach(HeightMapSettings hmSettings in heightMapSettings) {
+                if(!hmSettings.useForTerrain) {
                     continue;
                 }
-                heightMapSettingsSelect.heightMapSettings.OnValuesUpdated -= OnValuesUpdated;
-                heightMapSettingsSelect.heightMapSettings.OnValuesUpdated += OnValuesUpdated;
+                hmSettings.OnValuesUpdated -= OnValuesUpdated;
+                hmSettings.OnValuesUpdated += OnValuesUpdated;
             }
         }
         // if(textureData != null) {
